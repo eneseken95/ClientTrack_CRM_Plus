@@ -1,0 +1,120 @@
+# Python / FastAPI
+# -------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+*.log
+*.sqlite3
+*.db
+
+
+# Environment / Secrets
+# -------------------------------------------------
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+ENV/
+.virtualenv/
+instance/
+
+
+# Cache / Tests / Coverage
+# -------------------------------------------------
+.cache/
+.coverage
+coverage/
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+.dmypy.json
+.pyre/
+
+
+# Alembic
+# -------------------------------------------------
+alembic/versions/__pycache__/
+alembic/versions/*.pyc
+
+
+# Docker / Runtime
+# -------------------------------------------------
+docker-data/
+*.pid
+docker-compose.override.yml
+docker-compose.local.yml
+
+
+# Supabase (local tooling)
+# -------------------------------------------------
+.supabase/
+
+
+# macOS
+# -------------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+
+
+# IDE / Editors
+# -------------------------------------------------
+.vscode/
+.idea/
+*.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+# iOS / Swift (future-proof)
+# -------------------------------------------------
+xcuserdata/
+DerivedData/
+*.xcuserstate
+*.xccheckout
+*.moved-aside
+*.xcscmblueprint
+*.xcuserdatad/
+*.xcworkspace
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+project.xcworkspace/
+*.swiftpm/
+.swiftpm/
+
+
+# Frontend (if added later)
+# -------------------------------------------------
+node_modules/
+dist/
+build/
+
+
+# Secrets / Keys / Certificates
+# -------------------------------------------------
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+
+# Logs & Temp Files
+# -------------------------------------------------
+*.tmp
+*.log
+*.bak
+*.orig
