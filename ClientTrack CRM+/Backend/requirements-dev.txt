@@ -1,0 +1,14 @@
+# Development & Testing Dependencies
+# -------------------------------------------------
+
+# Testing Framework
+pytest==8.3.3
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+pytest-mock==3.14.0
+
+# Test Data Generation
+faker==30.8.2
+
+# Async SQL for tests (SQLite)
+aiosqlite==0.20.0
