@@ -55,4 +55,4 @@ def create_refresh_token(sub: str, minutes: int | None = None):
 
 def hash_refresh_token(token: str) -> str:
     secret = settings.REFRESH_TOKEN_SECRET_KEY.encode()
-    return hmac.new(secret, token.encode(), hashlib.sha256).hexdigest()
+    return hmac.HMAC(secret, token.encode(), hashlib.sha256).hexdigest()
