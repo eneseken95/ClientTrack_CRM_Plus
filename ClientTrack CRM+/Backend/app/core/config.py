@@ -4,14 +4,12 @@ from pydantic import computed_field
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
-
     DB_HOST: str
     DB_PORT: int
     DB_NAME: str
     DB_USER: str
     DB_PASS: str
     POSTGRES_EXPORTER_DSN: str
-
     SECRET_KEY: str
     ALGORITHM: str
     SENDGRID_API_KEY: str
@@ -32,6 +30,15 @@ class Settings(BaseSettings):
     GRAFANA_PASSWORD: str
     ELASTICSEARCH_URL: str
     CORS_ORIGINS: str = ""
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_PUBLISHABLE_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_PRICE_BASIC_MONTHLY: str = ""
+    STRIPE_PRICE_BASIC_YEARLY: str = ""
+    STRIPE_PRICE_PRO_MONTHLY: str = ""
+    STRIPE_PRICE_PRO_YEARLY: str = ""
+    STRIPE_PRICE_TEAM_MONTHLY: str = ""
+    STRIPE_PRICE_TEAM_YEARLY: str = ""
 
     @computed_field
     @property
