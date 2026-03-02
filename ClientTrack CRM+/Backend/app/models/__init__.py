@@ -1,3 +1,4 @@
+from typing import Optional
 from app.core.db import Base
 from app.models.user import User
 from app.models.client import Client
