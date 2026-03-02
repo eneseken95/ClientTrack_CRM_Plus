@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Integer, Text, DateTime, ForeignKey, func, JSON
 from app.models.base import Base
@@ -18,7 +19,7 @@ class Client(Base):
     industry: Mapped[str] = mapped_column(String(255), nullable=True)
     latitude: Mapped[str] = mapped_column(String(50), nullable=True)
     longitude: Mapped[str] = mapped_column(String(50), nullable=True)
-    company_logo: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    company_logo: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     owner_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=False
     )
@@ -28,4 +29,4 @@ class Client(Base):
     updated_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
-    attachments: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    attachments: Mapped[Optional[list[str]]] = mapped_column(JSON, nullable=True)
