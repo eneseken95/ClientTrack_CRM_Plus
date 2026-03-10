@@ -211,6 +211,8 @@ struct ProfileAnalyticsView: View {
                 .padding(.horizontal, 4)
             ZStack {
                 VStack(spacing: 24) {
+                    clientGrowthTrendCard
+                    statusTrendCard
                     if !displayStatusData.isEmpty {
                         statusChartCard
                     }
@@ -418,6 +420,24 @@ struct ProfileAnalyticsView: View {
         )
     }
 
+    private var clientGrowthTrendCard: some View {
+        TrendLineChartCard(
+            title: "Client Growth",
+            trendData: vm.clientGrowthTrend,
+            lineColor: Color(red: 0.30, green: 0.85, blue: 0.55),
+            secondaryLineColor: Color(red: 0.35, green: 0.60, blue: 1.0),
+            isLoading: vm.isLoading
+        )
+    }
+
+    private var statusTrendCard: some View {
+        StatusTrendChartCard(
+            title: "Status Trends",
+            statusTrendMap: vm.statusTrendMap,
+            isLoading: vm.isLoading
+        )
+    }
+
     private func miniStatCard(icon: String, iconColor: Color, title: String, value: String) -> some View {
         VStack(spacing: 10) {
             ZStack {
@@ -460,6 +480,29 @@ struct ProfileAnalyticsView: View {
         let color: Color
     }
 
+    struct TrendDataPoint: Identifiable {
+        let id = UUID()
+        let date: Date
+        let label: String
+        let count: Int
+    }
+
+    enum TimePeriod: String, CaseIterable {
+        case oneMonth = "1 Month"
+        case threeMonths = "3 Months"
+        case sixMonths = "6 Months"
+        case lastYear = "Last Year"
+
+        var monthsBack: Int {
+            switch self {
+            case .oneMonth: return 1
+            case .threeMonths: return 3
+            case .sixMonths: return 6
+            case .lastYear: return 12
+            }
+        }
+    }
+
     @MainActor
     final class ProfileAnalyticsViewModel: ObservableObject {
         @Published var totalClients = 0
@@ -469,6 +512,8 @@ struct ProfileAnalyticsView: View {
         @Published var clients: [ClientDTO] = []
         @Published var categoryData: [ChartData] = []
         @Published var industryData: [ChartData] = []
+        @Published var clientGrowthTrend: [TrendDataPoint] = []
+        @Published var statusTrendMap: [String: [TrendDataPoint]] = [:]
         @Published var isLoading = false
         func load() async {
             isLoading = true
@@ -522,7 +567,360 @@ struct ProfileAnalyticsView: View {
                     return ChartData(label: pair.key, count: pair.value.count, color: indColors[index % indColors.count])
                 }
 
+                let trendFormatter = DateFormatter()
+                trendFormatter.dateFormat = "MMM"
+                var growthTrend: [TrendDataPoint] = []
+                var statusTrends: [String: [TrendDataPoint]] = [:]
+                let allStatuses = Set(fetchedClients.compactMap { $0.status ?? "Unknown" })
+
+                for i in (0 ..< 12).reversed() {
+                    guard let monthDate = calendar.date(byAdding: .month, value: -i, to: now) else { continue }
+                    let m = calendar.component(.month, from: monthDate)
+                    let y = calendar.component(.year, from: monthDate)
+                    let monthClients = fetchedClients.filter { client in
+                        guard let date = client.createdAt else { return false }
+                        return calendar.component(.month, from: date) == m
+                            && calendar.component(.year, from: date) == y
+                    }
+                    growthTrend.append(TrendDataPoint(
+                        date: monthDate,
+                        label: trendFormatter.string(from: monthDate),
+                        count: monthClients.count
+                    ))
+                    for status in allStatuses {
+                        let count = monthClients.filter { ($0.status ?? "Unknown") == status }.count
+                        statusTrends[status, default: []].append(TrendDataPoint(
+                            date: monthDate,
+                            label: trendFormatter.string(from: monthDate),
+                            count: count
+                        ))
+                    }
+                }
+                clientGrowthTrend = growthTrend
+                statusTrendMap = statusTrends
+
             } catch {}
         }
+    }
+}
+
+struct TrendLineChartCard: View {
+    let title: String
+    let trendData: [ProfileAnalyticsView.TrendDataPoint]
+    let lineColor: Color
+    let secondaryLineColor: Color
+    let isLoading: Bool
+
+    @State private var selectedPeriod: ProfileAnalyticsView.TimePeriod = .sixMonths
+
+    private var filteredData: [ProfileAnalyticsView.TrendDataPoint] {
+        let count = selectedPeriod.monthsBack
+        return Array(trendData.suffix(count))
+    }
+
+    private var currentTotal: Int {
+        filteredData.reduce(0) { $0 + $1.count }
+    }
+
+    private var previousTotal: Int {
+        let count = selectedPeriod.monthsBack
+        let allData = trendData
+        let endIndex = allData.count - count
+        guard endIndex > 0 else { return 0 }
+        let startIndex = max(0, endIndex - count)
+        return allData[startIndex..<endIndex].reduce(0) { $0 + $1.count }
+    }
+
+    private var growthPercentage: Double {
+        guard previousTotal > 0 else { return currentTotal > 0 ? 100 : 0 }
+        return Double(currentTotal - previousTotal) / Double(previousTotal) * 100
+    }
+
+    private var dateString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        return formatter.string(from: Date())
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(title)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.white)
+                    HStack(spacing: 12) {
+                        Text("\(currentTotal)")
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(lineColor)
+                        HStack(spacing: 3) {
+                            Image(systemName: growthPercentage >= 0 ? "arrow.up.right" : "arrow.down.right")
+                                .font(.system(size: 10, weight: .bold))
+                            Text(String(format: "%.1f%%", abs(growthPercentage)))
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .foregroundColor(growthPercentage >= 0 ? lineColor : Color(red: 0.95, green: 0.45, blue: 0.45))
+                    }
+                }
+                Spacer()
+                Text(dateString)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.6))
+            }
+
+            HStack(spacing: 0) {
+                ForEach(ProfileAnalyticsView.TimePeriod.allCases, id: \.self) { period in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            selectedPeriod = period
+                        }
+                    } label: {
+                        Text(period.rawValue)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(selectedPeriod == period ? .white : .white.opacity(0.5))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(selectedPeriod == period ? Color.white.opacity(0.15) : .clear)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .stroke(selectedPeriod == period ? Color.white.opacity(0.25) : .clear, lineWidth: 1)
+                                    )
+                            )
+                    }
+                }
+            }
+
+            if isLoading {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.12))
+                    .frame(height: 160)
+                    .shimmer()
+            } else {
+                Chart(filteredData) { item in
+                    LineMark(
+                        x: .value("Month", item.label),
+                        y: .value("Count", item.count)
+                    )
+                    .interpolationMethod(.catmullRom)
+                    .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                    .foregroundStyle(lineColor)
+
+                    AreaMark(
+                        x: .value("Month", item.label),
+                        y: .value("Count", item.count)
+                    )
+                    .interpolationMethod(.catmullRom)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [lineColor.opacity(0.3), lineColor.opacity(0.0)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                }
+                .chartYAxis {
+                    AxisMarks(position: .trailing) { _ in
+                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.3, dash: [4, 3]))
+                            .foregroundStyle(Color.white.opacity(0.1))
+                        AxisValueLabel()
+                            .foregroundStyle(Color.white.opacity(0.5))
+                            .font(.system(size: 10))
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks { _ in
+                        AxisValueLabel()
+                            .foregroundStyle(Color.white.opacity(0.5))
+                            .font(.system(size: 10))
+                    }
+                }
+                .frame(height: 160)
+                .animation(.easeInOut(duration: 0.4), value: selectedPeriod)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.06))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        )
+    }
+}
+
+struct StatusTrendChartCard: View {
+    let title: String
+    let statusTrendMap: [String: [ProfileAnalyticsView.TrendDataPoint]]
+    let isLoading: Bool
+
+    @State private var selectedPeriod: ProfileAnalyticsView.TimePeriod = .sixMonths
+
+    private let trendColors: [Color] = [
+        Color(red: 0.35, green: 0.60, blue: 1.0),
+        Color(red: 0.30, green: 0.85, blue: 0.55),
+        Color(red: 0.95, green: 0.45, blue: 0.45),
+        Color(red: 0.90, green: 0.65, blue: 0.20),
+        Color(red: 0.70, green: 0.45, blue: 1.0),
+        Color(red: 0.30, green: 0.80, blue: 0.85)
+    ]
+
+    private struct StatusLine: Identifiable {
+        let id = UUID()
+        let status: String
+        let data: [ProfileAnalyticsView.TrendDataPoint]
+        let color: Color
+        let latestCount: Int
+        let percentage: Double
+    }
+
+    private var statusLines: [StatusLine] {
+        let sortedStatuses = statusTrendMap.sorted { a, b in
+            let aTotal = a.value.reduce(0) { $0 + $1.count }
+            let bTotal = b.value.reduce(0) { $0 + $1.count }
+            return aTotal > bTotal
+        }
+        let grandTotal = sortedStatuses.reduce(0) { sum, pair in
+            sum + pair.value.suffix(selectedPeriod.monthsBack).reduce(0) { $0 + $1.count }
+        }
+        return sortedStatuses.enumerated().map { index, pair in
+            let filtered = Array(pair.value.suffix(selectedPeriod.monthsBack))
+            let total = filtered.reduce(0) { $0 + $1.count }
+            let pct = grandTotal > 0 ? (Double(total) / Double(grandTotal) * 100) : 0
+            return StatusLine(
+                status: pair.key,
+                data: filtered,
+                color: trendColors[index % trendColors.count],
+                latestCount: filtered.last?.count ?? 0,
+                percentage: pct
+            )
+        }
+    }
+
+    private var dateString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d, yyyy"
+        return formatter.string(from: Date())
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                Text(title)
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+                Spacer()
+                Text(dateString)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.6))
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(statusLines) { line in
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(line.color)
+                            .frame(width: 7, height: 7)
+                        Text(line.status)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white.opacity(0.85))
+                        Text(String(format: "%.1f%%", line.percentage))
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(line.color)
+                    }
+                }
+            }
+
+            HStack(spacing: 0) {
+                ForEach(ProfileAnalyticsView.TimePeriod.allCases, id: \.self) { period in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            selectedPeriod = period
+                        }
+                    } label: {
+                        Text(period.rawValue)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(selectedPeriod == period ? .white : .white.opacity(0.5))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(selectedPeriod == period ? Color.white.opacity(0.15) : .clear)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .stroke(selectedPeriod == period ? Color.white.opacity(0.25) : .clear, lineWidth: 1)
+                                    )
+                            )
+                    }
+                }
+            }
+
+            if isLoading {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.12))
+                    .frame(height: 180)
+                    .shimmer()
+            } else {
+                Chart {
+                    ForEach(statusLines) { line in
+                        ForEach(line.data) { point in
+                            LineMark(
+                                x: .value("Month", point.label),
+                                y: .value("Count", point.count),
+                                series: .value("Status", line.status)
+                            )
+                            .interpolationMethod(.catmullRom)
+                            .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round))
+                            .foregroundStyle(line.color)
+                        }
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks(position: .trailing) { _ in
+                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.3, dash: [4, 3]))
+                            .foregroundStyle(Color.white.opacity(0.1))
+                        AxisValueLabel()
+                            .foregroundStyle(Color.white.opacity(0.5))
+                            .font(.system(size: 10))
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks { _ in
+                        AxisValueLabel()
+                            .foregroundStyle(Color.white.opacity(0.5))
+                            .font(.system(size: 10))
+                    }
+                }
+                .chartLegend(.hidden)
+                .frame(height: 180)
+                .animation(.easeInOut(duration: 0.4), value: selectedPeriod)
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.06))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        )
     }
 }
