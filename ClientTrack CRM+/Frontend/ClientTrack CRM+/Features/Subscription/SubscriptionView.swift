@@ -282,7 +282,7 @@ struct SubscriptionView: View {
                 Task { await authState.restoreSession() }
             }
         } message: {
-            Text("Welcome to Pro! Your subscription is now active.")
+            Text("Welcome to \(planName)! Your subscription is now active.")
         }
         .alert("Cancel Subscription", isPresented: $showCancelConfirmation) {
             Button("Yes, Cancel", role: .destructive) {
@@ -290,7 +290,7 @@ struct SubscriptionView: View {
             }
             Button("Keep Plan", role: .cancel) {}
         } message: {
-            Text("Are you sure you want to cancel your active subscription? This action cannot be undone and your Pro benefits will be terminated.")
+            Text("Are you sure you want to cancel your active subscription? This action cannot be undone and your \(planName) benefits will be terminated.")
         }
     }
 
