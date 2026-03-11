@@ -581,12 +581,12 @@ struct SubscriptionView: View {
     }
 
     private var activeSubscriptionCard: some View {
-        HStack(alignment: .center, spacing: 16) {
-            Image(systemName: "checkmark.seal.fill")
-                .font(.system(size: 24))
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(.white, .green)
-            VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 24))
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.white, .green)
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Image(systemName: "crown.fill")
@@ -609,12 +609,8 @@ struct SubscriptionView: View {
                             .foregroundColor(.white.opacity(0.45))
                     }
                 }
-                HStack(spacing: 16) {
-                    featureChip(icon: "person.3.fill", text: "50 Users")
-                    featureChip(icon: "chart.bar.fill", text: "Analytics")
-                    featureChip(icon: "sparkles", text: "AI")
-                }
             }
+            planFeatureChips
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -644,15 +640,41 @@ struct SubscriptionView: View {
     private func featureChip(icon: String, text: String) -> some View {
         HStack(spacing: 4) {
             Image(systemName: icon)
-                .font(.system(size: 10))
+                .font(.system(size: 9))
             Text(text)
-                .font(.system(size: 10))
+                .font(.system(size: 9))
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
         }
         .foregroundColor(.white.opacity(0.6))
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
         .background(Color.white.opacity(0.05))
         .clipShape(Capsule())
+    }
+
+    @ViewBuilder
+    private var planFeatureChips: some View {
+        switch planName {
+        case "Basic":
+            HStack(spacing: 8) {
+                featureChip(icon: "person.2.fill", text: "50 Clients")
+                featureChip(icon: "envelope.fill", text: "Email")
+                featureChip(icon: "chart.pie.fill", text: "Dashboard")
+            }
+        case "Team":
+            HStack(spacing: 8) {
+                featureChip(icon: "person.3.fill", text: "Unlimited")
+                featureChip(icon: "chart.bar.fill", text: "Analytics")
+                featureChip(icon: "star.fill", text: "Early Access")
+            }
+        default:
+            HStack(spacing: 8) {
+                featureChip(icon: "person.3.fill", text: "Unlimited")
+                featureChip(icon: "sparkles", text: "AI Email")
+                featureChip(icon: "line.3.horizontal.decrease", text: "Filtering")
+            }
+        }
     }
 
     private func offsetForCard(_ index: Int) -> CGFloat {
