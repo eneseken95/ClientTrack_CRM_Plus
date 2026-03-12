@@ -108,6 +108,7 @@ struct ClientLogoView: View {
             }
             .padding()
         }
+        .scrollIndicators(.hidden)
         .navigationTitle("Company Logo")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showImagePicker) {

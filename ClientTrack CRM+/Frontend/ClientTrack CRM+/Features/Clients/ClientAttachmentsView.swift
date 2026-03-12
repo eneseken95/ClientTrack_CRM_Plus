@@ -59,6 +59,7 @@ struct ClientAttachmentsView: View {
                         }
                         .padding()
                     }
+                    .scrollIndicators(.hidden)
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                             Button {
@@ -245,9 +246,11 @@ struct FullScreenPhotoView: View {
     let onDismiss: () -> Void
     @State private var scale: CGFloat = 1.0
     @State private var lastScale: CGFloat = 1.0
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            AppTheme.authBackgroundGradient.ignoresSafeArea()
             if let url = URL(string: attachment.fileUrl) {
                 AsyncImage(url: url) { phase in
                     switch phase {
@@ -258,21 +261,57 @@ struct FullScreenPhotoView: View {
                             .resizable()
                             .scaledToFit()
                             .scaleEffect(scale)
+                            .offset(offset)
                             .gesture(
-                                MagnificationGesture()
-                                    .onChanged { value in
-                                        scale = lastScale * value
-                                    }
-                                    .onEnded { _ in
-                                        lastScale = scale
-                                        if scale < 1 {
-                                            withAnimation {
-                                                scale = 1
-                                                lastScale = 1
+                                SimultaneousGesture(
+                                    MagnificationGesture()
+                                        .onChanged { value in
+                                            scale = lastScale * value
+                                        }
+                                        .onEnded { _ in
+                                            lastScale = scale
+                                            if scale < 1 {
+                                                withAnimation {
+                                                    scale = 1
+                                                    lastScale = 1
+                                                    offset = .zero
+                                                    lastOffset = .zero
+                                                }
+                                            }
+                                        },
+                                    DragGesture()
+                                        .onChanged { value in
+                                            if scale > 1 {
+                                                offset = CGSize(
+                                                    width: lastOffset.width + value.translation.width,
+                                                    height: lastOffset.height + value.translation.height
+                                                )
                                             }
                                         }
-                                    }
+                                        .onEnded { _ in
+                                            lastOffset = offset
+                                            if scale <= 1 {
+                                                withAnimation {
+                                                    offset = .zero
+                                                    lastOffset = .zero
+                                                }
+                                            }
+                                        }
+                                )
                             )
+                            .onTapGesture(count: 2) {
+                                withAnimation {
+                                    if scale > 1 {
+                                        scale = 1
+                                        lastScale = 1
+                                        offset = .zero
+                                        lastOffset = .zero
+                                    } else {
+                                        scale = 2.5
+                                        lastScale = 2.5
+                                    }
+                                }
+                            }
                     case .failure:
                         VStack {
                             Image(systemName: "exclamationmark.triangle")
@@ -289,9 +328,9 @@ struct FullScreenPhotoView: View {
                 HStack {
                     Button(action: onDismiss) {
                         Image(systemName: "xmark")
-                            .font(.title2)
+                            .font(.body.weight(.semibold))
                             .foregroundColor(.white)
-                            .padding()
+                            .padding(10)
                             .background(Circle().fill(Color.black.opacity(0.6)))
                     }
                     .padding()
