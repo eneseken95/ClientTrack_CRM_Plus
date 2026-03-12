@@ -103,103 +103,55 @@ struct ProfileAnalyticsView: View {
     }
 
     private var overviewSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             Text("Overview")
-                .font(.headline)
+                .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.white)
-                .padding(.horizontal, 4)
-            HStack(spacing: 14) {
-                miniStatCard(
+            
+            VStack(spacing: 16) {
+                revenueCatStatCard(
                     icon: "person.2.fill",
-                    iconColor: .green,
-                    title: "Total Clients",
-                    value: vm.isLoading ? "..." : "\(vm.totalClients)"
-                )
-                miniStatCard(
-                    icon: "calendar.badge.plus",
                     iconColor: .orange,
+                    title: "Total Clients",
+                    value: vm.isLoading ? "..." : "\(vm.totalClients)",
+                    subtitle: "total"
+                )
+                revenueCatStatCard(
+                    icon: "calendar.badge.plus",
+                    iconColor: .green,
                     title: "This Month",
-                    value: vm.isLoading ? "..." : "\(vm.clientsThisMonth)"
+                    value: vm.isLoading ? "..." : "\(vm.clientsThisMonth)",
+                    subtitle: "this month"
                 )
             }
         }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.06))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        )
     }
 
     private var monthlyChartSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Clients Per Month")
-                .font(.headline)
-                .foregroundColor(.white)
-            if vm.isLoading {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.gray.opacity(0.12))
-                    .frame(height: 220)
-                    .shimmer()
-            } else {
-                Chart(vm.monthlyData) { item in
-                    LineMark(
-                        x: .value("Month", item.month),
-                        y: .value("Clients", item.count)
-                    )
-                    .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                    .foregroundStyle(Color.pink)
-                    .symbol(Circle().strokeBorder(lineWidth: 2))
-                    .symbolSize(40)
-                    AreaMark(
-                        x: .value("Month", item.month),
-                        y: .value("Clients", item.count)
-                    )
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color.pink.opacity(0.4), Color.pink.opacity(0.0)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    PointMark(
-                        x: .value("Month", item.month),
-                        y: .value("Clients", item.count)
-                    )
-                    .foregroundStyle(.white)
-                    .annotation(position: .top, spacing: 6) {
-                        Text("\(item.count)")
-                            .font(.caption2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color.pink.opacity(0.7))
-                            )
-                    }
-                }
-                .chartYAxis {
-                    AxisMarks(position: .leading) { _ in
-                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [4, 3]))
-                            .foregroundStyle(Color.white.opacity(0.15))
-                        AxisTick(stroke: StrokeStyle(lineWidth: 1))
-                            .foregroundStyle(Color.white.opacity(0.3))
-                        AxisValueLabel()
-                            .foregroundStyle(Color.white.opacity(0.7))
-                            .font(.caption2)
-                    }
-                }
-                .chartXAxis {
-                    AxisMarks { _ in
-                        AxisGridLine(stroke: StrokeStyle(lineWidth: 0.3, dash: [3, 4]))
-                            .foregroundStyle(Color.white.opacity(0.1))
-                        AxisValueLabel()
-                            .foregroundStyle(Color.white.opacity(0.7))
-                            .font(.caption)
-                    }
-                }
-                .frame(height: 220)
-            }
-        }
-        .padding(20)
-        .background(Color.white.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        TrendLineChartCard(
+            title: "Clients Per Month",
+            trendData: vm.clientGrowthTrend,
+            lineColor: Color.cyan,
+            secondaryLineColor: Color.cyan,
+            isLoading: vm.isLoading
+        )
+        .buttonStyle(.plain)
     }
 
     private var advancedAnalyticsSection: some View {
@@ -223,8 +175,9 @@ struct ProfileAnalyticsView: View {
                         industryChartCard
                     }
                 }
-                .blur(radius: isPremium ? 0 : 8)
                 .disabled(!isPremium)
+                .frame(maxHeight: isPremium ? .infinity : 380)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
                 .padding(.top, 10)
                 if !isPremium {
                     VStack(spacing: 12) {
@@ -251,18 +204,30 @@ struct ProfileAnalyticsView: View {
                                 .clipShape(Capsule())
                         }
                     }
-                    .padding(.vertical, 20)
+                    .padding(.vertical, 30)
                     .padding(.horizontal, 20)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(.ultraThinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .padding(.horizontal, 2)
                 }
             }
         }
         .padding(20)
-        .background(Color.white.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.06))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        )
     }
 
     private var statusChartCard: some View {
@@ -302,11 +267,20 @@ struct ProfileAnalyticsView: View {
             }
         }
         .padding()
-        .background(Color.white.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.06))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
         )
     }
 
@@ -357,11 +331,20 @@ struct ProfileAnalyticsView: View {
             }
         }
         .padding()
-        .background(Color.white.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.06))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
         )
     }
 
@@ -412,11 +395,20 @@ struct ProfileAnalyticsView: View {
             }
         }
         .padding()
-        .background(Color.white.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.06))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
         )
     }
 
@@ -438,26 +430,35 @@ struct ProfileAnalyticsView: View {
         )
     }
 
-    private func miniStatCard(icon: String, iconColor: Color, title: String, value: String) -> some View {
-        VStack(spacing: 10) {
-            ZStack {
-                Circle()
-                    .fill(iconColor.opacity(0.15))
-                    .frame(width: 44, height: 44)
+    private func revenueCatStatCard(icon: String, iconColor: Color, title: String, value: String, subtitle: String) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 8) {
                 Image(systemName: icon)
-                    .font(.title3)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(iconColor)
+                Text(title)
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(iconColor)
             }
-            Text(value)
-                .font(.system(size: 26, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-            Text(title)
-                .font(.caption)
-                .foregroundColor(.secondary)
+            
+            HStack(alignment: .bottom) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(value)
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.white)
+                    Text(subtitle)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.5))
+                }
+                Spacer()
+                Rectangle()
+                    .fill(iconColor.opacity(0.7))
+                    .frame(width: 120, height: 2)
+                    .padding(.bottom, 12)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 18)
-        .background(Color.white.opacity(0.08))
+        .padding(20)
+        .background(Color(red: 0.11, green: 0.11, blue: 0.12))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
@@ -670,25 +671,25 @@ struct TrendLineChartCard: View {
 
             HStack(spacing: 0) {
                 ForEach(ProfileAnalyticsView.TimePeriod.allCases, id: \.self) { period in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            selectedPeriod = period
+                    Text(period.rawValue)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(selectedPeriod == period ? .white : .white.opacity(0.5))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(selectedPeriod == period ? Color.white.opacity(0.15) : .clear)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(selectedPeriod == period ? Color.white.opacity(0.25) : .clear, lineWidth: 1)
+                                )
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                selectedPeriod = period
+                            }
                         }
-                    } label: {
-                        Text(period.rawValue)
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(selectedPeriod == period ? .white : .white.opacity(0.5))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(selectedPeriod == period ? Color.white.opacity(0.15) : .clear)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .stroke(selectedPeriod == period ? Color.white.opacity(0.25) : .clear, lineWidth: 1)
-                                    )
-                            )
-                    }
                 }
             }
 
@@ -843,25 +844,25 @@ struct StatusTrendChartCard: View {
 
             HStack(spacing: 0) {
                 ForEach(ProfileAnalyticsView.TimePeriod.allCases, id: \.self) { period in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            selectedPeriod = period
+                    Text(period.rawValue)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(selectedPeriod == period ? .white : .white.opacity(0.5))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(selectedPeriod == period ? Color.white.opacity(0.15) : .clear)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .stroke(selectedPeriod == period ? Color.white.opacity(0.25) : .clear, lineWidth: 1)
+                                )
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                selectedPeriod = period
+                            }
                         }
-                    } label: {
-                        Text(period.rawValue)
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(selectedPeriod == period ? .white : .white.opacity(0.5))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(selectedPeriod == period ? Color.white.opacity(0.15) : .clear)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .stroke(selectedPeriod == period ? Color.white.opacity(0.25) : .clear, lineWidth: 1)
-                                    )
-                            )
-                    }
                 }
             }
 

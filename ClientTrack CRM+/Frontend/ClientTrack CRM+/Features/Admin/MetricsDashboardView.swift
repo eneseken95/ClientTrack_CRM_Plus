@@ -43,8 +43,10 @@ struct MetricsDashboardView: View {
                     }
                     .padding()
                 }
+                .scrollIndicators(.hidden)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(AppTheme.authBackgroundGradient.ignoresSafeArea())
         .navigationTitle("Metrics Dashboard")
         .navigationBarTitleDisplayMode(.inline)

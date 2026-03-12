@@ -31,6 +31,7 @@ struct MetricsView: View {
                         .font(.system(.caption, design: .monospaced))
                         .padding()
                 }
+                .scrollIndicators(.hidden)
             }
         }
         .navigationTitle("Metrics")
