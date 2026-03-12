@@ -36,7 +36,7 @@ struct AdminUsersListView: View {
                             .environmentObject(authState)
                     } label: {
                         HStack(spacing: 12) {
-                            CachedRemoteImage(url: user.avatar_url, size: 46)
+                            CachedRemoteImage(url: user.avatar_url, size: 38)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("\(user.name) \(user.surname ?? "")")
                                     .font(.headline)
@@ -53,6 +53,24 @@ struct AdminUsersListView: View {
                         }
                         .padding(.vertical, 4)
                     }
+                    .listRowInsets(EdgeInsets(top: 20, leading: 16, bottom: 20, trailing: 16))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.white.opacity(0.06))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1
+                                    )
+                            )
+                            .padding(.vertical, 4)
+                    )
                 }
             }
         }

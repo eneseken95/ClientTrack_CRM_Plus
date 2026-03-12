@@ -90,6 +90,24 @@ struct EmailsView: View {
                                     }
                                     .tint(.red)
                                 }
+                                .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.white.opacity(0.06))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(
+                                                    LinearGradient(
+                                                        colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ),
+                                                    lineWidth: 1
+                                                )
+                                        )
+                                        .padding(.vertical, 4)
+                                )
                             }
                         }
                         .listStyle(.insetGrouped)
@@ -132,6 +150,7 @@ struct EmailsView: View {
                     .background(.ultraThinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .padding(.horizontal, 20)
+                    .offset(y: -15)
                 }
             }
             .background(AppTheme.authBackgroundGradient.ignoresSafeArea())

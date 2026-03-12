@@ -125,7 +125,7 @@ struct EmailRow: View {
                 CompanyLogoImage(
                     logoUrl: email.clientCompanyLogo,
                     companyName: email.clientName ?? email.recipient.components(separatedBy: "@").first ?? email.recipient,
-                    size: 34
+                    size: 42
                 )
                 .overlay(
                     Circle()

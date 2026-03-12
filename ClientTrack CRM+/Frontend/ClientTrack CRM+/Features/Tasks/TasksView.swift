@@ -63,6 +63,24 @@ struct TasksView: View {
                                     }
                                     .tint(.red)
                                 }
+                                .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16))
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color.white.opacity(0.06))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(
+                                                    LinearGradient(
+                                                        colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    ),
+                                                    lineWidth: 1
+                                                )
+                                        )
+                                        .padding(.vertical, 4)
+                                )
                             }
                         }
                         .listStyle(.insetGrouped)
@@ -110,7 +128,7 @@ struct TaskRow: View {
         HStack(spacing: 12) {
             Image(systemName: statusIcon)
                 .foregroundColor(statusColor)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 20, weight: .semibold))
                 .frame(width: 26)
             VStack(alignment: .leading, spacing: 2) {
                 Text(task.title)

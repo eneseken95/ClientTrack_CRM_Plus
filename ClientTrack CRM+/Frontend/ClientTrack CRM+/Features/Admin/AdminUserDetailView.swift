@@ -132,7 +132,7 @@ struct AdminUserDetailView: View {
                                 CompanyLogoImage(
                                     logoUrl: client.companyLogo,
                                     companyName: client.company,
-                                    size: 32
+                                    size: 45
                                 )
                                 .overlay(
                                     Circle()

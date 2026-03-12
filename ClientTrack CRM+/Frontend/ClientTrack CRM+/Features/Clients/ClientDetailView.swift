@@ -57,18 +57,18 @@ struct ClientDetailView: View {
                     VStack(spacing: 4) {
                         if let company = vm.client.company {
                             Text(company)
-                                .font(.title3)
+                                .font(.title2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.white)
                         } else {
                             Text("\(vm.client.name) \(vm.client.surname ?? "")")
-                                .font(.title3)
+                                .font(.title2)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.white)
                         }
                         if let email = vm.client.email, !email.isEmpty {
                             Text(email)
-                                .font(.subheadline)
+                                .font(.body)
                                 .foregroundColor(AppTheme.textSecondary)
                         }
                     }
@@ -159,7 +159,6 @@ struct ClientDetailView: View {
                                         .fill(AppTheme.statusColor(for: status).opacity(0.12))
                                 )
                                 .foregroundColor(AppTheme.statusColor(for: status))
-                                .padding(.trailing, -8)
                         }
                     }
                     clientRow(icon: "link.circle.fill", color: .mint, title: "Source", value: vm.client.source)

@@ -126,8 +126,25 @@ struct ClientListView: View {
                                         }
                                     }
                                 }
-                                .padding(.vertical, 3)
                             }
+                            .listRowInsets(EdgeInsets(top: 22, leading: 16, bottom: 22, trailing: 16))
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.white.opacity(0.06))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(
+                                                LinearGradient(
+                                                    colors: [Color.white.opacity(0.15), Color.white.opacity(0.05)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                ),
+                                                lineWidth: 1
+                                            )
+                                    )
+                                    .padding(.vertical, 4)
+                            )
                             .onAppear {
                                 Task {
                                     await vm.loadMoreIfNeeded(currentItem: client)
