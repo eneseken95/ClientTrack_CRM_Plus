@@ -39,8 +39,8 @@ struct MainTabView: View {
                 } label: {
                     VStack(spacing: 4) {
                         if (authState.currentUser?.avatar_url) != nil {
-                            CachedAvatarView(size: 24)
-                                .frame(width: 24, height: 24)
+                            CachedAvatarView(size: 22)
+                                .frame(width: 22, height: 22)
                                 .clipShape(Circle())
                                 .overlay(
                                     Circle()
@@ -49,8 +49,8 @@ struct MainTabView: View {
                                 .environmentObject(authState)
                         } else {
                             Image(systemName: selectedTab == 4 ? "person.circle.fill" : "person.circle")
-                                .font(.system(size: 24))
-                                .frame(height: 24)
+                                .font(.system(size: 22))
+                                .frame(height: 22)
                                 .foregroundColor(selectedTab == 4 ? AppTheme.primary : .gray)
                         }
                         Text("Profile")
@@ -65,7 +65,7 @@ struct MainTabView: View {
             .background(
                 ZStack {
                     Rectangle().fill(.ultraThinMaterial)
-                    Rectangle().fill(AppTheme.authBackgroundGradient.opacity(0.95))
+                    Rectangle().fill(AppTheme.authBackgroundGradient.opacity(0.2))
                 }
                 .ignoresSafeArea(edges: .bottom)
             )
@@ -79,8 +79,8 @@ struct MainTabView: View {
         } label: {
             VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 24))
-                    .frame(height: 24)
+                    .font(.system(size: 22))
+                    .frame(height: 22)
                     .foregroundColor(selectedTab == tag ? AppTheme.primary : .gray)
                 Text(title)
                     .font(.caption2)

@@ -268,6 +268,7 @@
 				DEVELOPMENT_TEAM = FVGCA873Z7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ClientTrack-CRM--Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ClientTrack;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -303,6 +304,7 @@
 				DEVELOPMENT_TEAM = FVGCA873Z7;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ClientTrack-CRM--Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ClientTrack;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
