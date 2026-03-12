@@ -67,6 +67,9 @@ struct VerifyEmailView: View {
             }
             .padding(.horizontal, 28)
         }
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         .navigationTitle("OTP")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)

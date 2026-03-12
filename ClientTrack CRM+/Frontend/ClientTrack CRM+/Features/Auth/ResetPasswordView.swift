@@ -68,6 +68,9 @@ struct ResetPasswordView: View {
             }
             .padding(.horizontal, 28)
         }
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         .navigationTitle("Reset")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)

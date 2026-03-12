@@ -28,6 +28,7 @@ async def update_user_info(db: AsyncSession, user_id: int, data: UserUpdate):
 
 
 async def request_email_change(db: AsyncSession, user, new_email: str):
+    new_email = new_email.strip().lower()
     existing = await user_repo.get_by_email(db, new_email)
     if existing:
         raise HTTPException(status_code=400, detail="Email already in use")

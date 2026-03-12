@@ -52,5 +52,13 @@ struct StyledTextField: View {
             RoundedRectangle(cornerRadius: AppTheme.cornerMedium)
                 .strokeBorder(Color.white.opacity(0.15), lineWidth: 1)
         )
+        .onChange(of: text) { _, newValue in
+            if keyboardType == .emailAddress {
+                let lowered = newValue.lowercased()
+                if lowered != newValue {
+                    text = lowered
+                }
+            }
+        }
     }
 }

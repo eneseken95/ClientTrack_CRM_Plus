@@ -61,6 +61,9 @@ struct ForgotPasswordView: View {
             }
             .padding(.horizontal, 28)
         }
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
         .navigationTitle("Forgot")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)

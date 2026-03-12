@@ -15,6 +15,8 @@ struct ChangeEmailView: View {
     @State private var otp = ""
     @State private var otpSent = false
     @State private var showSuccessAlert = false
+    @FocusState private var focusedField: Field?
+    enum Field { case email, otp }
     var body: some View {
         NavigationStack {
             Form {
@@ -24,6 +26,11 @@ struct ChangeEmailView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .disabled(otpSent)
+                        .focused($focusedField, equals: .email)
+                        .onChange(of: newEmail) { _, newValue in
+                            let lowered = newValue.lowercased()
+                            if lowered != newValue { newEmail = lowered }
+                        }
                 }
                 if !otpSent {
                     Section {
@@ -45,6 +52,7 @@ struct ChangeEmailView: View {
                                 }
                             }
                         }
+                        .buttonStyle(.plain)
                         .disabled(vm.isBusy || newEmail.isEmpty)
                         .opacity((vm.isBusy || newEmail.isEmpty) ? 0.4 : 1.0)
                     }
@@ -67,6 +75,7 @@ struct ChangeEmailView: View {
                     }) {
                         TextField("OTP code", text: $otp)
                             .keyboardType(.numberPad)
+                            .focused($focusedField, equals: .otp)
                     }
                     Section {
                         Button {
@@ -78,6 +87,7 @@ struct ChangeEmailView: View {
                                 Text("Verify & Log out")
                             }
                         }
+                        .buttonStyle(.plain)
                         .disabled(vm.isBusy || otp.isEmpty)
                         .opacity((vm.isBusy || otp.isEmpty) ? 0.4 : 1.0)
                     }
@@ -91,6 +101,14 @@ struct ChangeEmailView: View {
             }
             .scrollContentBackground(.hidden)
             .scrollIndicators(.hidden)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        focusedField = nil
+                    }
+                }
+            }
             .background(AppTheme.authBackgroundGradient.ignoresSafeArea())
             .navigationTitle("Change Email")
             .toolbar {

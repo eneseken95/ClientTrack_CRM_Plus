@@ -28,6 +28,7 @@ import re
 async def register_user(
     db: AsyncSession, name: str, surname: str, email: str, password: str, phone: str
 ):
+    email = email.strip().lower()
     try:
         validate_email(email)
     except EmailNotValidError:
@@ -89,6 +90,7 @@ async def resend_otp(db: AsyncSession, email: str):
 
 
 async def login(db: AsyncSession, email: str, password: str):
+    email = email.strip().lower()
     try:
         validate_email(email)
     except EmailNotValidError:
@@ -120,6 +122,7 @@ async def login(db: AsyncSession, email: str, password: str):
 
 
 async def forgot_password(db: AsyncSession, email: str):
+    email = email.strip().lower()
     user = await user_repo.get_by_email(db, email)
     if not user:
         raise HTTPException(404, "User not found")
@@ -142,6 +145,7 @@ async def forgot_password(db: AsyncSession, email: str):
 
 
 async def reset_password(db: AsyncSession, email: str, otp: str, new_password: str):
+    email = email.strip().lower()
     user = await user_repo.get_by_email(db, email)
     if not user:
         raise HTTPException(404, "User not found")

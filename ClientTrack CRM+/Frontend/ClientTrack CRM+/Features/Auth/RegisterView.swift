@@ -83,7 +83,11 @@ struct RegisterView: View {
                 }
                 .padding(.horizontal, 28)
             }
+            .scrollIndicators(.hidden)
             .scrollDismissesKeyboard(.interactively)
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
         }
         .navigationTitle("Register")
         .navigationBarTitleDisplayMode(.inline)
