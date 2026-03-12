@@ -13,6 +13,7 @@ struct VerifyEmailChangeView: View {
     @EnvironmentObject var authState: AuthState
     @State private var otp = ""
     @State private var showSuccessAlert = false
+    @FocusState private var isOtpFocused: Bool
     var body: some View {
         Form {
             Section("OTP Verification") {
@@ -24,6 +25,7 @@ struct VerifyEmailChangeView: View {
                     .foregroundColor(.secondary)
                 TextField("OTP", text: $otp)
                     .keyboardType(.numberPad)
+                    .focused($isOtpFocused)
             }
             Button {
                 verify()
@@ -34,10 +36,20 @@ struct VerifyEmailChangeView: View {
                     Text("Verify")
                 }
             }
+            .buttonStyle(.plain)
             .disabled(vm.isBusy || otp.isEmpty)
             if let err = vm.errorMessage {
                 Text(err)
                     .foregroundColor(.red)
+            }
+        }
+        .scrollIndicators(.hidden)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    isOtpFocused = false
+                }
             }
         }
         .navigationTitle("Verify Email")

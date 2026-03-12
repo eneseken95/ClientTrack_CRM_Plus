@@ -25,6 +25,9 @@ struct EditProfileView: View {
             }
             .scrollContentBackground(.hidden)
             .scrollIndicators(.hidden)
+            .onTapGesture {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
             .background(AppTheme.authBackgroundGradient.ignoresSafeArea())
             .toolbarBackground(.visible, for: .navigationBar)
             .navigationTitle("Edit Profile")

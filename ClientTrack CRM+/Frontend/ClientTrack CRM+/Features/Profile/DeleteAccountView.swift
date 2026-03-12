@@ -13,6 +13,7 @@ struct DeleteAccountView: View {
     @ObservedObject var vm: ProfileViewModel
     @State private var otp = ""
     @State private var step: Int = 1
+    @FocusState private var isOtpFocused: Bool
     var body: some View {
         NavigationStack {
             Form(content: {
@@ -24,7 +25,13 @@ struct DeleteAccountView: View {
                                 .foregroundColor(.red)
                         }
                     } else {
-                        Section {
+                        Section(footer: Group {
+                            if let err = vm.errorMessage, step == 1 {
+                                Text(err)
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                            }
+                        }) {
                             Text("This will send an OTP to confirm account deletion.")
                                 .font(.callout)
                                 .foregroundColor(.secondary)
@@ -50,6 +57,7 @@ struct DeleteAccountView: View {
                                     .foregroundColor(.white)
                             }
                         }
+                        .buttonStyle(.plain)
                         .disabled(vm.isBusy)
                         .opacity(vm.isBusy ? 0.4 : 1.0)
                     }
@@ -63,6 +71,15 @@ struct DeleteAccountView: View {
                     }) {
                         TextField("otp", text: $otp)
                             .keyboardType(.numberPad)
+                            .focused($isOtpFocused)
+                            .toolbar {
+                                ToolbarItemGroup(placement: .keyboard) {
+                                    Spacer()
+                                    Button("Done") {
+                                        isOtpFocused = false
+                                    }
+                                }
+                            }
                     }
                     Button(role: .destructive) {
                         Task {
@@ -87,6 +104,7 @@ struct DeleteAccountView: View {
                                 .foregroundColor(.white)
                         }
                     }
+                    .buttonStyle(.plain)
                     .disabled(vm.isBusy || otp.isEmpty)
                     .opacity((vm.isBusy || otp.isEmpty) ? 0.4 : 1.0)
                 }

@@ -27,7 +27,11 @@ struct ComposeEmailView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppTheme.authBackgroundGradient.ignoresSafeArea()
+                AppTheme.authBackgroundGradient
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
                 ScrollView {
                     VStack(spacing: 16) {
                         VStack(alignment: .leading, spacing: 6) {
@@ -153,6 +157,7 @@ struct ComposeEmailView: View {
                     .padding(.horizontal, 24)
                     .padding(.top, 20)
                 }
+                .scrollIndicators(.hidden)
                 .scrollDismissesKeyboard(.interactively)
             }
             .navigationTitle("Compose Email")
@@ -294,9 +299,17 @@ final class ComposeEmailViewModel: ObservableObject {
         isSending = true
         errorMessage = nil
         defer { isSending = false }
+        
+        var finalClientId = selectedClientId
+        if finalClientId == nil {
+            if let matchedClient = clients.first(where: { $0.email?.lowercased() == toEmail.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) }) {
+                finalClientId = matchedClient.id
+            }
+        }
+        
         do {
             return try await EmailsService.sendEmail(
-                clientId: selectedClientId,
+                clientId: finalClientId,
                 toEmail: toEmail,
                 subject: subject,
                 body: body

@@ -36,14 +36,17 @@ struct LocationPickerView: View {
                         .foregroundColor(.white)
                 }
                 if !searchQuery.isEmpty {
-                    Button {
+                    Button(action: {
                         searchQuery = ""
-                    } label: {
+                    }) {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.white.opacity(0.6))
+                            .frame(width: 24, height: 24)
                     }
+                    .buttonStyle(.borderless)
                 }
             }
+            .frame(minHeight: 24)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(Color.clear)
@@ -67,6 +70,7 @@ struct LocationPickerView: View {
                         selectedCoordinate = coordinate
                         latitudeString = String(coordinate.latitude)
                         longitudeString = String(coordinate.longitude)
+                        reverseGeocode(coordinate: coordinate)
                     }
                 }
             }
@@ -87,6 +91,30 @@ struct LocationPickerView: View {
                         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
                     )
                 )
+                if searchQuery.isEmpty {
+                    reverseGeocode(coordinate: coord)
+                }
+            }
+        }
+    }
+    
+    private func reverseGeocode(coordinate: CLLocationCoordinate2D) {
+        let geocoder = CLGeocoder()
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            if error == nil, let placemark = placemarks?.first {
+                var addressParts: [String] = []
+                if let name = placemark.name, !name.isEmpty, name != placemark.locality { addressParts.append(name) }
+                if let street = placemark.thoroughfare, !addressParts.contains(street) { addressParts.append(street) }
+                if let city = placemark.locality { addressParts.append(city) }
+                if let country = placemark.country { addressParts.append(country) }
+                
+                let addressString = addressParts.joined(separator: ", ")
+                DispatchQueue.main.async {
+                    if !addressString.isEmpty {
+                        self.searchQuery = addressString
+                    }
+                }
             }
         }
     }
@@ -111,6 +139,18 @@ struct LocationPickerView: View {
                 self.selectedCoordinate = coordinate
                 self.latitudeString = String(coordinate.latitude)
                 self.longitudeString = String(coordinate.longitude)
+                
+                var addressParts: [String] = []
+                if let name = item.placemark.name, !name.isEmpty, name != item.placemark.locality { addressParts.append(name) }
+                if let street = item.placemark.thoroughfare, !addressParts.contains(street) { addressParts.append(street) }
+                if let city = item.placemark.locality { addressParts.append(city) }
+                if let country = item.placemark.country { addressParts.append(country) }
+                
+                let addressString = addressParts.joined(separator: ", ")
+                if !addressString.isEmpty {
+                    self.searchQuery = addressString
+                }
+                
                 withAnimation {
                     self.position = .region(
                         MKCoordinateRegion(

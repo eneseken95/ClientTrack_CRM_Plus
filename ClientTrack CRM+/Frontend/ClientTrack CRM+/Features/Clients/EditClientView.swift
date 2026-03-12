@@ -45,6 +45,12 @@ struct EditClientView: View {
                     TextField("Name", text: $name)
                     TextField("Surname", text: $surname)
                     TextField("Email", text: $email)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .onChange(of: email) { _, newValue in
+                            let lowered = newValue.lowercased()
+                            if lowered != newValue { email = lowered }
+                        }
                     TextField("Phone", text: $phone)
                 }
                 Section("Company") {
@@ -103,7 +109,13 @@ struct EditClientView: View {
             }
             .scrollContentBackground(.hidden)
             .scrollIndicators(.hidden)
-            .background(AppTheme.authBackgroundGradient.ignoresSafeArea())
+            .background(
+                AppTheme.authBackgroundGradient
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+            )
             .navigationTitle("Edit Client")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

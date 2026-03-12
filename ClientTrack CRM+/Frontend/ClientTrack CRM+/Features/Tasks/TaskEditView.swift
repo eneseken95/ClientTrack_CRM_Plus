@@ -140,7 +140,13 @@ struct TaskEditView: View {
             }
             .scrollContentBackground(.hidden)
             .scrollIndicators(.hidden)
-            .background(AppTheme.authBackgroundGradient.ignoresSafeArea())
+            .background(
+                AppTheme.authBackgroundGradient
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+            )
             .navigationTitle("Edit Task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

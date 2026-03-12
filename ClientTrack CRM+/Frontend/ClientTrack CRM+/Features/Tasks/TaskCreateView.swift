@@ -60,7 +60,13 @@ struct TaskCreateView: View {
             }
             .scrollContentBackground(.hidden)
             .scrollIndicators(.hidden)
-            .background(AppTheme.authBackgroundGradient.ignoresSafeArea())
+            .background(
+                AppTheme.authBackgroundGradient
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+            )
             .navigationTitle("New Task")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

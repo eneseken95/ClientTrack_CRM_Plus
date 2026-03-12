@@ -21,6 +21,10 @@ struct ClientCreateView: View {
                     TextField("Email", text: $vm.email)
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
+                        .onChange(of: vm.email) { _, newValue in
+                            let lowered = newValue.lowercased()
+                            if lowered != newValue { vm.email = lowered }
+                        }
                     TextField("Phone", text: $vm.phone)
                         .keyboardType(.phonePad)
                 }
@@ -85,7 +89,13 @@ struct ClientCreateView: View {
             }
             .scrollContentBackground(.hidden)
             .scrollIndicators(.hidden)
-            .background(AppTheme.authBackgroundGradient.ignoresSafeArea())
+            .background(
+                AppTheme.authBackgroundGradient
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+            )
             .navigationTitle("New Client")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
